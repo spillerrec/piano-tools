@@ -4,10 +4,14 @@
 
 TEMPLATE = app
 TARGET = miditest
-LIBS += -lrtmidi
-QT += gui widgets
+#LIBS += -lrtmidi
+INCLUDEPATH += deps/include /usr/include/guido
+QT += gui widgets printsupport
 QMAKE_CXXFLAGS += -std=c++14
 
 # Input
 #HEADERS += 
 SOURCES += src/main.cpp
+
+LIBS += -Ldeps/libs -lGuidoQt
+LIBS += -lGUIDOEngine

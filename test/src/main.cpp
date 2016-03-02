@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include <RtMidi.h>
+//#include <RtMidi.h>
 
 double total_time = 0.0;
 
@@ -26,6 +26,9 @@ void callback( double deltatime, std::vector<unsigned char>* message, void *user
 #include <QRawFont>
 #include <QFont>
 #include <QPainter>
+
+#include <guido/GUIDOEngine.h>
+#include <GuidoQt/QGuidoPainter.h>
 class DrawFont : public QWidget{
 	private:
 		QFont font;
@@ -37,14 +40,38 @@ class DrawFont : public QWidget{
 	private:
 		void paintEvent( QPaintEvent* ) override{
 			QPainter painter( this );
+			
+			QGuidoPainter * p = QGuidoPainter::createGuidoPainter();
+			p->setGMNCode( "{[\\meter<\"4/4\"> a1*1/16 a*3/16 a*1/4 a],[\\meter<\"4/4\"> a0*1/8 b0]}" );
+			
+			p->draw( &painter, 1, rect() );
+			
+			//Clean up QGuidoPainter
+			QGuidoPainter::destroyGuidoPainter( p );
+			
 			painter.setFont( font );
 			painter.drawText( 100,100, QString( "\uE01B\uE01B\uE01B\uE01B\uE01B\uE01B\uE01B\uE01B" ) );
 			painter.drawText( 100,100, QString( "\uE050\uE1D7\uE1D4\uE1E7 \uE1E5 \uE1D5\uE1F3" ) );
 		}
 };
 
+int guidoTest( int argc, char* argv[] ){
+	QApplication a( argc, argv );
+	
+	QGuidoPainter::startGuidoEngine();
+	
+	
+	DrawFont font;
+	font.show();
+	font.update();
+	auto result = a.exec();
+	
+	QGuidoPainter::stopGuidoEngine();
+	return result;
+}
+
 int main( int argc, char *argv[] ){
-	//*
+	/*
 	try{
 	//	std::vector<RtMidi::Api> apis;
 	//	RtMidi::getCompiledApi( apis );
@@ -81,11 +108,7 @@ int main( int argc, char *argv[] ){
 	}
 	return 0;
 	/*/
-	QApplication a( argc, argv );
-	DrawFont font;
-	font.show();
-	font.update();
-	return a.exec();
+	return guidoTest( argc, argv );
 	//*/
 	
 }
