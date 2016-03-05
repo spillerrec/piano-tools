@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-//#include <RtMidi.h>
+#include <RtMidi.h>
 
 double total_time = 0.0;
 
@@ -19,6 +19,44 @@ void callback( double deltatime, std::vector<unsigned char>* message, void *user
 		if ( nBytes > 0 )
 			std::cout << "stamp = " << total_time << std::endl;
 	}
+}
+
+int midiConnect( int /*argc*/, char* /*argv*/[] ){
+	try{
+	//	std::vector<RtMidi::Api> apis;
+	//	RtMidi::getCompiledApi( apis );
+	//	for( auto api : apis )
+	//		std::cout << api << std::endl;
+		
+		RtMidiIn  midiin;
+		RtMidiOut midiout;
+		
+		unsigned nPorts = midiin.getPortCount();
+		std::cout << "\nThere are " << nPorts << " MIDI input sources available.\n";
+		for( unsigned i=0; i<nPorts; i++ )
+			std::cout << "\tInput Port #" << i+1 << ": " << midiin.getPortName(i) << std::endl;
+		
+		if( nPorts > 0 ){
+			midiin.openPort( 1 );
+			midiin.setCallback( &callback );
+			midiin.ignoreTypes( false, false, false );
+			
+			char input;
+			std::cin >> input;
+		}
+		
+		nPorts = midiout.getPortCount();
+		std::cout << "\nThere are " << nPorts << " MIDI output ports available.\n";
+		for( unsigned i=0; i<nPorts; i++ )
+			std::cout << "\tOutput Port #" << i+1 << ": " << midiout.getPortName(i) << std::endl;
+		
+		std::cout << std::endl;
+	}
+	catch( RtMidiError &error ){
+		error.printMessage();
+		return -1;
+	}
+	return 0;
 }
 
 #include <QWidget>
@@ -70,45 +108,17 @@ int guidoTest( int argc, char* argv[] ){
 	return result;
 }
 
-int main( int argc, char *argv[] ){
-	/*
-	try{
-	//	std::vector<RtMidi::Api> apis;
-	//	RtMidi::getCompiledApi( apis );
-	//	for( auto api : apis )
-	//		std::cout << api << std::endl;
-		
-		RtMidiIn  midiin;
-		RtMidiOut midiout;
-		
-		unsigned nPorts = midiin.getPortCount();
-		std::cout << "\nThere are " << nPorts << " MIDI input sources available.\n";
-		for( unsigned i=0; i<nPorts; i++ )
-			std::cout << "\tInput Port #" << i+1 << ": " << midiin.getPortName(i) << std::endl;
-		
-		if( nPorts > 0 ){
-			midiin.openPort( 1 );
-			midiin.setCallback( &callback );
-			midiin.ignoreTypes( false, false, false );
-			
-			char input;
-			std::cin >> input;
-		}
-		
-		nPorts = midiout.getPortCount();
-		std::cout << "\nThere are " << nPorts << " MIDI output ports available.\n";
-		for( unsigned i=0; i<nPorts; i++ )
-			std::cout << "\tOutput Port #" << i+1 << ": " << midiout.getPortName(i) << std::endl;
-		
-		std::cout << std::endl;
-	}
-	catch( RtMidiError &error ){
-		error.printMessage();
+#include "midi/MidiContents.hpp"
+int loadingTest( int argc, char* argv[] ){
+	if( argc != 2 )
 		return -1;
-	}
-	return 0;
-	/*/
-	return guidoTest( argc, argv );
-	//*/
 	
+	Midi::MidiContents contents( argv[1] );
+	return 0;
+}
+
+int main( int argc, char *argv[] ){
+	return loadingTest( argc, argv );
+	//return midiConnect( argc, argv );
+	//return guidoTest( argc, argv );
 }
